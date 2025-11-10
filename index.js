@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const port = process.env.PORT || 3000;
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.u12htqq.mongodb.net/?appName=Cluster0`;
 
@@ -26,11 +26,37 @@ async function run() {
     await client.connect();
 
     const db = client.db("plate_db");
-    const productsCollection = db.collection("products");
+    const foodCollection = db.collection("food");
 
-    app.post("/products", async (req, res) => {
+    app.get("/food", async (req, res) => {
+      const cursor = foodCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post("/food", async (req, res) => {
       const newProduct = req.body;
-      const result = await productsCollection.insertOne(newProduct);
+      const result = await foodCollection.insertOne(newProduct);
+      res.send(result);
+    });
+
+    app.patch("/food/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedFood = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: {
+          name: updatedFood.name,
+        },
+      };
+      const result = await foodCollection.updateOne(query, update);
+      res.send(result);
+    });
+
+    app.delete("/food/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodCollection.deleteOne(query);
       res.send(result);
     });
 
