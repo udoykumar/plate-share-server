@@ -46,7 +46,7 @@ async function run() {
         res.send(result);
       }
     });
-
+    // food api
     app.get("/foods", async (req, res) => {
       console.log(req.query);
       const email = req.query.email;
@@ -58,6 +58,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.get("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodCollection.findOne(query);
+      res.send(result);
+    });
+
     app.get("/featured-foods", async (req, res) => {
       // const foodField = {};
       const cursor = foodCollection
