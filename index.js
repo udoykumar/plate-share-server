@@ -26,21 +26,39 @@ async function run() {
     await client.connect();
 
     const db = client.db("plate_db");
-    const foodCollection = db.collection("food");
+    const foodCollection = db.collection("foods");
+    const bidsCollection = db.collection("bids");
 
-    app.get("/food", async (req, res) => {
-      const cursor = foodCollection.find();
+    app.get("/foods", async (req, res) => {
+      console.log(req.query);
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.donator_email = email;
+      }
+      const cursor = foodCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.get("/featured-foods", async (req, res) => {
+      // const foodField = {};
+      const cursor = foodCollection
+        .find()
+        .sort({
+          food_quantity: -1,
+        })
+        .limit(6);
       const result = await cursor.toArray();
       res.send(result);
     });
 
-    app.post("/food", async (req, res) => {
+    app.post("/foods", async (req, res) => {
       const newProduct = req.body;
       const result = await foodCollection.insertOne(newProduct);
       res.send(result);
     });
 
-    app.patch("/food/:id", async (req, res) => {
+    app.patch("/foods/:id", async (req, res) => {
       const id = req.params.id;
       const updatedFood = req.body;
       const query = { _id: new ObjectId(id) };
@@ -53,10 +71,36 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/food/:id", async (req, res) => {
+    app.delete("/foods/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await foodCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // bids related apis
+    app.get("/bids", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+
+      if (email) {
+        query.donator_email = email;
+      }
+      const cursor = bidsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post("/bids", async (req, res) => {
+      const newBid = req.body;
+      const result = await bidsCollection.insertOne(newBid);
+      res.send(result);
+    });
+
+    app.delete("/bids/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bidsCollection.deleteOne(query);
       res.send(result);
     });
 
