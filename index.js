@@ -23,7 +23,7 @@ app.get("/", (req, res) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("plate_db");
     const foodCollection = db.collection("foods");
@@ -141,7 +141,7 @@ async function run() {
     });
 
     // bids related apis
-    app.get("/bids", async (req, res) => {
+    app.get("/food-request", async (req, res) => {
       const email = req.query.email;
       const query = {};
 
@@ -149,6 +149,14 @@ async function run() {
         query.donator_email = email;
       }
       const cursor = bidsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/foods/food-request/:id", async (req, res) => {
+      const productId = req.params.id;
+      const query = { food_id: productId };
+      const cursor = foodRequestCollection.find(query).sort({ createdAt: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -166,7 +174,7 @@ async function run() {
       res.send(result);
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
