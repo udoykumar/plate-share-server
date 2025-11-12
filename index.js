@@ -58,6 +58,7 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
     app.get("/foods/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -88,17 +89,48 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/foods/:id", async (req, res) => {
-      const id = req.params.id;
-      const updatedFood = req.body;
-      const query = { _id: new ObjectId(id) };
-      const update = {
-        $set: {
-          name: updatedFood.name,
-        },
-      };
-      const result = await foodCollection.updateOne(query, update);
-      res.send(result);
+    // app.patch("/foods/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const updatedFood = req.body;
+    //   const query = { _id: new ObjectId(id) };
+    //   const update = {
+    //     $set: {
+    //       name: updatedFood,
+    //     },
+    //   };
+    //   const result = await foodCollection.updateOne(query, update);
+    //   res.send(result);
+    // });
+
+    app.get("/my-foods/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const result = await foodCollection
+          .find({ donator_email: email })
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Failed to fetch user foods" });
+      }
+    });
+
+    app.put("/foods/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedFood = req.body;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            ...updatedFood,
+          },
+        };
+        const result = await foodCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Failed to update food" });
+      }
     });
 
     app.delete("/foods/:id", async (req, res) => {
