@@ -27,7 +27,7 @@ async function run() {
 
     const db = client.db("plate_db");
     const foodCollection = db.collection("foods");
-    const bidsCollection = db.collection("bids");
+    const foodRequestCollection = db.collection("food-request");
     const userCollection = db.collection("users");
 
     // user related api
@@ -77,6 +77,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/foods", async (req, res) => {
+      const foods = await foodCollection.find().toArray();
+      res.send(foods);
+    });
+
     app.post("/foods", async (req, res) => {
       const newProduct = req.body;
       const result = await foodCollection.insertOne(newProduct);
@@ -116,9 +121,9 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/bids", async (req, res) => {
+    app.post("/food-request", async (req, res) => {
       const newBid = req.body;
-      const result = await bidsCollection.insertOne(newBid);
+      const result = await foodRequestCollection.insertOne(newBid);
       res.send(result);
     });
 
