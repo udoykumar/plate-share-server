@@ -65,6 +65,15 @@ async function run() {
       const result = await foodCollection.findOne(query);
       res.send(result);
     });
+    app.patch("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const { food_status } = req.body;
+      const result = await foodCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { food_status } }
+      );
+      res.send(result);
+    });
 
     app.get("/featured-foods", async (req, res) => {
       // const foodField = {};
@@ -88,19 +97,6 @@ async function run() {
       const result = await foodCollection.insertOne(newProduct);
       res.send(result);
     });
-
-    // app.patch("/foods/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const updatedFood = req.body;
-    //   const query = { _id: new ObjectId(id) };
-    //   const update = {
-    //     $set: {
-    //       name: updatedFood,
-    //     },
-    //   };
-    //   const result = await foodCollection.updateOne(query, update);
-    //   res.send(result);
-    // });
 
     app.get("/my-foods/:email", async (req, res) => {
       try {
@@ -140,7 +136,7 @@ async function run() {
       res.send(result);
     });
 
-    // bids related apis
+    // foodrequest related apis
     app.get("/food-request", async (req, res) => {
       const email = req.query.email;
       const query = {};
@@ -148,7 +144,7 @@ async function run() {
       if (email) {
         query.donator_email = email;
       }
-      const cursor = bidsCollection.find(query);
+      const cursor = foodCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -167,12 +163,31 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/bids/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await bidsCollection.deleteOne(query);
+    app.get("/food-request/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const result = await foodRequestCollection
+        .find({ user_email: email })
+        .toArray();
       res.send(result);
     });
+
+    app.patch("/food-request/:id", async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const result = await foodRequestCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { status } }
+      );
+      res.send(result);
+    });
+
+    // app.delete("/food-request/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await bidsCollection.deleteOne(query);
+    //   res.send(result);
+    // });
 
     // await client.db("admin").command({ ping: 1 });
     console.log(
