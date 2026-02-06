@@ -1,9 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-require("dotenv").config();
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.u12htqq.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
@@ -70,7 +70,7 @@ async function run() {
       const { food_status } = req.body;
       const result = await foodCollection.updateOne(
         { _id: new ObjectId(id) },
-        { $set: { food_status } }
+        { $set: { food_status } },
       );
       res.send(result);
     });
@@ -163,6 +163,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/food-request/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodRequestCollection.deleteOne(query);
+      res.send(result);
+    });
+
     app.get("/food-request/:email", async (req, res) => {
       const email = req.params.email;
       console.log(email);
@@ -177,14 +184,14 @@ async function run() {
       const { status } = req.body;
       const result = await foodRequestCollection.updateOne(
         { _id: new ObjectId(id) },
-        { $set: { status } }
+        { $set: { status } },
       );
       res.send(result);
     });
 
     // await client.db("admin").command({ ping: 1 });
     console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
+      "Pinged your deployment. You successfully connected to MongoDB!",
     );
   } finally {
   }
